@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const port = 3000;
-const server = http.createServer((request, result) => {
+const server = http.createServer((request, response) => {
   const filePath = path.join(
     __dirname,
     request.url === "/" ? "index.html" : request.url
@@ -19,6 +19,18 @@ const server = http.createServer((request, result) => {
   };
 
   const contentType = mimeTypes[extensionName] || "application/octet-stream";
+
+  fs.readFile(filePath, (error, content) => {
+    if (error) {
+      if (error.code === "ENOENT") {
+        response.writeHead(404, { "Content-Type": "text/html" });
+        response.end(404, "File not found");application/octet-stream
+      }
+    } else {
+      response.writeHead(200, { "Content-Type": contentType });
+      response.end(content, "utf-8");
+    }
+  });
 });
 
 server.listen(port, () => {
